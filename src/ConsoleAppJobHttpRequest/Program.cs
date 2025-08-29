@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.SystemConsole.Themes;
 using Serilog;
-using System.Text.Json;
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
@@ -18,10 +17,12 @@ logger.Information("Iniciando a execucao do Job...");
 try
 {
     using var httpClient = new HttpClient();
-    var response = await httpClient.GetAsync(configuration["EndpointRequest"]);
+    var endpointRequest = configuration["EndpointRequest"];
+    var response = await httpClient.GetAsync(endpointRequest);
     response.EnsureSuccessStatusCode();
+    logger.Information($"URL para envio da requisicao: {endpointRequest}");
     logger.Information("Notificacao enviada com sucesso!");
-    logger.Information($"Dados recebidos = {JsonSerializer.Serialize(await response.Content.ReadAsStringAsync())}");
+    logger.Information($"Dados recebidos = {await response.Content.ReadAsStringAsync()}");
     logger.Information("Job executado com sucesso!");
 }
 catch (Exception ex)
